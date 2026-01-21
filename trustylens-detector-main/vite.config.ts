@@ -3,13 +3,8 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "./",   // ✅ IMPORTANT: fixes Netlify blank page
-  server: {
-    host: "::",
-    port: 8080,
-  },
+  base: "/",   // 🔥 IMPORTANT CHANGE (NOT "./")
   plugins: [
     react(),
     mode === "development" && componentTagger(),
