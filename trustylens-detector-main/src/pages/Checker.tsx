@@ -8,9 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileSearch, RotateCcw } from "lucide-react";
 
 interface PlagiarismResult {
-  similarity_score: number;
-  plagiarism_level: string;
-  plagiarized_sentences: string[];
+  plagiarism_percentage: number;
 }
 
 const Checker = () => {
@@ -59,29 +57,31 @@ const Checker = () => {
       formData.append("document2", file2!);
 
       const response = await fetch(
-  `${import.meta.env.VITE_API_URL}/check-plagiarism`,
-  {
-    method: "POST",
-    body: formData,
-  }
-);
-
+        `${import.meta.env.VITE_API_URL}/check-plagiarism`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to analyze documents");
+        const errText = await response.text();
+        throw new Error(errText);
       }
 
-      const data = await response.json();
+      const data: PlagiarismResult = await response.json();
       setResult(data);
-      
+
       toast({
         title: "Analysis Complete",
         description: "Your documents have been analyzed successfully.",
       });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Analysis Failed",
-        description: "An error occurred while analyzing the documents. Please try again.",
+        description:
+          "An error occurred while analyzing the documents. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -101,23 +101,10 @@ const Checker = () => {
     <Layout>
       <div className="container mx-auto px-4 py-12 md:py-20">
         <div className="mx-auto max-w-3xl">
-          {/* Header */}
-          <div className="mb-12 text-center">
-            <div className="mb-4 inline-flex items-center justify-center rounded-full bg-accent/10 p-4">
-              <FileSearch className="h-8 w-8 text-accent" />
-            </div>
-            <h1 className="font-heading text-3xl font-bold text-foreground md:text-4xl">
-              Plagiarism Checker
-            </h1>
-            <p className="mt-4 font-body text-lg text-muted-foreground">
-              Upload two .txt documents to compare and detect plagiarism
-            </p>
-          </div>
 
           {!isLoading && !result && (
-            <div className="animate-fade-in space-y-8">
-              {/* Upload Section */}
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-card md:p-8">
+            <div className="space-y-8">
+              <div className="rounded-2xl border bg-card p-6 shadow-card">
                 <div className="grid gap-6 md:grid-cols-2">
                   <FileUpload
                     label="Document 1"
@@ -145,40 +132,23 @@ const Checker = () => {
                   </Button>
                 </div>
               </div>
-
-              {/* Instructions */}
-              <div className="rounded-xl bg-muted/50 p-6">
-                <h3 className="font-heading text-sm font-semibold text-foreground">
-                  Instructions
-                </h3>
-                <ul className="mt-3 space-y-2 font-body text-sm text-muted-foreground">
-                  <li>• Only .txt files are supported</li>
-                  <li>• Maximum file size: 5MB per document</li>
-                  <li>• Both documents are required for comparison</li>
-                  <li>• Results include similarity score and highlighted matches</li>
-                </ul>
-              </div>
             </div>
           )}
 
           {isLoading && (
-            <div className="rounded-2xl border border-border bg-card shadow-card">
+            <div className="rounded-2xl border bg-card shadow-card">
               <LoadingSpinner />
             </div>
           )}
 
           {result && !isLoading && (
             <div className="space-y-6">
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-card md:p-8">
+              <div className="rounded-2xl border bg-card p-6 shadow-card">
                 <ResultDisplay result={result} />
               </div>
 
               <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handleReset}
-                >
+                <Button variant="outline" size="lg" onClick={handleReset}>
                   <RotateCcw className="mr-2 h-4 w-4" />
                   Check Another Document
                 </Button>
