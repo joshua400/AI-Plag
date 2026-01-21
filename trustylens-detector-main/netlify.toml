@@ -1,0 +1,4 @@
+[build]
+  base = "trustylens-detector-main"
+  command = "npm run build"
+  publish = "dist"

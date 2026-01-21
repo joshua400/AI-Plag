@@ -4,7 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
-  base: "/",   // 🔥 IMPORTANT CHANGE (NOT "./")
+  base: "/",   // ✅ correct for Netlify root deploy
   plugins: [
     react(),
     mode === "development" && componentTagger(),
