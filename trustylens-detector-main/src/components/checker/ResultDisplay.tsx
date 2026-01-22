@@ -1,30 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-
-interface PlagiarismSource {
-  title: string;
-  url: string;
-  percentage: number;
-}
+import { PlagiarismResult } from "@/pages/Checker";
 
 interface ResultDisplayProps {
-  result: {
-    plagiarism_percentage: number;
-    exact_match: number;
-    partial_match: number;
-    unique_content: number;
-    total_words: number;
-    total_chars: number;
-    results_details: Array<{
-      text: string;
-      is_plagiarized: boolean;
-      source_url?: string;
-    }>;
-    sources: PlagiarismSource[];
-  };
+  result: PlagiarismResult;
   onReset: () => void;
 }
 
@@ -32,8 +13,8 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
   const [expandedSource, setExpandedSource] = useState<number | null>(null);
 
   const chartData = [
-    { name: "Plagiarized", value: result.plagiarism_percentage, color: "#ef4444" },
-    { name: "Unique", value: 100 - result.plagiarism_percentage, color: "#10b981" },
+    { name: "Plagiarized", value: result.plagiarismPercentage, color: "#ef4444" },
+    { name: "Unique", value: result.uniquePercentage, color: "#10b981" },
   ];
 
   return (
@@ -48,24 +29,24 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
               <div className="mb-4 flex justify-between text-sm font-medium text-slate-500">
                 <span>Uploaded Text</span>
                 <div className="flex gap-4">
-                  <span>Words: {result.total_words}</span>
-                  <span>Characters: {result.total_chars}</span>
+                  <span>Words: {result.wordCount}</span>
+                  <span>Characters: {result.characterCount}</span>
                 </div>
               </div>
 
               <div className="prose prose-slate max-w-none text-lg leading-relaxed">
-                {result.results_details.map((detail, index) => (
-                  <span
-                    key={index}
-                    className={
-                      detail.is_plagiarized
-                        ? "bg-red-100 text-red-900"
-                        : "bg-green-50 text-slate-900"
-                    }
-                  >
-                    {detail.text}{" "}
-                  </span>
-                ))}
+                {result.highlightedText.map((detail, index) => {
+                  let bgColor = "bg-transparent";
+                  if (detail.type === "exact") bgColor = "bg-red-200 text-red-900";
+                  else if (detail.type === "partial") bgColor = "bg-orange-100 text-orange-900";
+                  else if (detail.type === "unique") bgColor = "bg-green-50 text-slate-900";
+
+                  return (
+                    <span key={index} className={bgColor}>
+                      {detail.text}{" "}
+                    </span>
+                  );
+                })}
               </div>
 
               <div className="mt-8 flex items-center justify-between">
@@ -101,7 +82,7 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-bold text-red-500">{result.plagiarism_percentage}%</span>
+                  <span className="text-2xl font-bold text-red-500">{result.plagiarismPercentage}%</span>
                   <span className="text-[10px] text-slate-400">Plagiarized</span>
                 </div>
               </div>
@@ -109,15 +90,15 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
               <div className="mt-6 w-full space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500 font-medium">Exact Match</span>
-                  <span className="font-bold text-orange-500">{result.exact_match}%</span>
+                  <span className="font-bold text-orange-500">{result.exactMatchPercentage}%</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500 font-medium">Partial Match</span>
-                  <span className="font-bold text-cyan-500">{result.partial_match}%</span>
+                  <span className="font-bold text-cyan-500">{result.partialMatchPercentage}%</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500 font-medium">Unique Content</span>
-                  <span className="font-bold text-emerald-500">{result.unique_content}%</span>
+                  <span className="font-bold text-emerald-500">{result.uniquePercentage}%</span>
                 </div>
               </div>
             </div>
@@ -143,7 +124,7 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
                 </button>
                 {expandedSource === index && (
                   <div className="border-t px-4 py-3">
-                    <p className="text-sm text-slate-600 mb-2">Match found in this source.</p>
+                    <p className="text-sm text-slate-600 mb-2">{source.matchedText}</p>
                     <a
                       href={source.url}
                       target="_blank"
@@ -166,4 +147,5 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
     </div>
   );
 };
+
 

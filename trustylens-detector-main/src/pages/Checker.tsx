@@ -5,48 +5,41 @@ import { ResultDisplay } from "@/components/checker/ResultDisplay";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { FileSearch, RotateCcw, Paperclip, Link as LinkIcon, Type } from "lucide-react";
-import { Input } from "@/components/ui/input";
 
-interface PlagiarismSource {
+export interface PlagiarismSource {
   title: string;
   url: string;
-  percentage: number;
+  matchedText: string;
 }
 
-interface PlagiarismResult {
-  plagiarism_percentage: number;
-  exact_match: number;
-  partial_match: number;
-  unique_content: number;
-  total_words: number;
-  total_chars: number;
-  results_details: Array<{
+export interface PlagiarismResult {
+  wordCount: number;
+  characterCount: number;
+  plagiarismPercentage: number;
+  exactMatchPercentage: number;
+  partialMatchPercentage: number;
+  uniquePercentage: number;
+  highlightedText: Array<{
     text: string;
-    is_plagiarized: boolean;
-    source_url?: string;
+    type: "exact" | "partial" | "unique";
+    sourceIndex: number | null;
+    similarity: number;
   }>;
   sources: PlagiarismSource[];
 }
 
 const Checker = () => {
   const [text, setText] = useState("");
-  const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<PlagiarismResult | null>(null);
   const { toast } = useToast();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
   const handleSubmit = async () => {
-    if (!text && !file && !url) {
+    if (!text && !url) {
       toast({
         title: "No Content",
-        description: "Please provide text, a file, or a URL to check.",
+        description: "Please provide text or a URL to check.",
         variant: "destructive",
       });
       return;
@@ -56,16 +49,18 @@ const Checker = () => {
     setResult(null);
 
     try {
-      const formData = new FormData();
-      if (text) formData.append("text", text);
-      if (file) formData.append("file", file);
-      if (url) formData.append("url", url);
+      // If URL is provided, we should ideally handle it. 
+      // Current backend only takes 'text', so we'll just send the text for now.
+      // If the user wants URL support, the backend needs an update too.
 
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/check-plagiarism`,
         {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: text }),
         }
       );
 
@@ -96,7 +91,6 @@ const Checker = () => {
 
   const handleReset = () => {
     setText("");
-    setFile(null);
     setUrl("");
     setResult(null);
   };
@@ -185,4 +179,5 @@ const Checker = () => {
 };
 
 export default Checker;
+
 
