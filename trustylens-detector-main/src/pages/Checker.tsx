@@ -116,19 +116,6 @@ const Checker = () => {
 
             {!result && (
               <div className="overflow-hidden rounded-xl border bg-white shadow-lg">
-                <div className="flex items-center justify-between bg-[#1e293b] px-6 py-3 text-white">
-                  <div className="flex items-center gap-4">
-                    <span className="text-xl font-bold italic text-cyan-400">30% OFF</span>
-                    <div className="hidden h-px w-10 bg-slate-600 md:block" />
-                    <span className="text-xs uppercase tracking-wider md:text-sm">Upto 60,000 Words</span>
-                    <span className="text-xs uppercase tracking-wider md:text-sm">No Ads</span>
-                    <span className="text-xs uppercase tracking-wider md:text-sm">Accurate Reports</span>
-                  </div>
-                  <div className="bg-yellow-400 px-4 py-1 text-sm font-bold text-black">
-                    STARTING FROM $20
-                  </div>
-                </div>
-
                 <div className="p-6">
                   <div className="relative">
                     <textarea

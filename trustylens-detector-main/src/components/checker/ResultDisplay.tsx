@@ -44,15 +44,6 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
         {/* Left Side: Uploaded Text */}
         <div className="lg:col-span-2">
           <div className="overflow-hidden rounded-xl border bg-white shadow-md">
-            <div className="flex items-center justify-between border-b bg-slate-50 px-6 py-4">
-              <div className="flex items-center gap-4">
-                <span className="text-xl font-bold italic text-cyan-500">30% OFF</span>
-                <span className="text-xs font-bold md:text-sm">Upto 60,000 Words</span>
-                <span className="text-xs font-bold md:text-sm">No Ads</span>
-              </div>
-              <div className="text-sm font-bold text-cyan-500">IN $20</div>
-            </div>
-
             <div className="p-6">
               <div className="mb-4 flex justify-between text-sm font-medium text-slate-500">
                 <span>Uploaded Text</span>
