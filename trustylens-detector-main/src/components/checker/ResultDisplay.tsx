@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
+import { ChevronDown, ChevronUp, Download, AlertCircle, AlertTriangle, Info, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { PlagiarismResult } from "@/pages/Checker";
@@ -52,9 +52,46 @@ ${result.sources.map((source, i) => `${i + 1}. ${source.title}
     { name: "Unique", value: result.uniquePercentage, color: "#10b981" },
   ];
 
+const getInsightIcon = (type: string) => {
+    switch (type) {
+      case "critical": return <AlertCircle className="h-5 w-5 text-red-500" />;
+      case "warning": return <AlertTriangle className="h-5 w-5 text-orange-500" />;
+      case "info": return <Info className="h-5 w-5 text-blue-500" />;
+      case "success": return <CheckCircle className="h-5 w-5 text-green-500" />;
+      default: return <Info className="h-5 w-5 text-blue-500" />;
+    }
+  };
+
+  const getInsightBg = (type: string) => {
+    switch (type) {
+      case "critical": return "bg-red-50 border-red-200";
+      case "warning": return "bg-orange-50 border-orange-200";
+      case "info": return "bg-blue-50 border-blue-200";
+      case "success": return "bg-green-50 border-green-200";
+      default: return "bg-blue-50 border-blue-200";
+    }
+  };
+
   return (
     <div className="space-y-8">
       <h2 className="text-center text-4xl font-bold text-[#1e293b]">Results</h2>
+
+      {result.aiInsights && result.aiInsights.length > 0 && (
+        <div className="rounded-xl border bg-white shadow-md p-6">
+          <h3 className="mb-4 text-xl font-bold text-[#1e293b]">AI Insights</h3>
+          <div className="space-y-3">
+            {result.aiInsights.map((insight, index) => (
+              <div key={index} className={`flex items-start gap-3 rounded-lg border p-4 ${getInsightBg(insight.type)}`}>
+                {getInsightIcon(insight.type)}
+                <div>
+                  <p className="font-semibold text-slate-800">{insight.title}</p>
+                  <p className="text-sm text-slate-600">{insight.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Left Side: Uploaded Text */}

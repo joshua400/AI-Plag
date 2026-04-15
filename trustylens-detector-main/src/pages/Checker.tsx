@@ -26,6 +26,11 @@ export interface PlagiarismResult {
     similarity: number;
   }>;
   sources: PlagiarismSource[];
+  aiInsights?: Array<{
+    type: "critical" | "warning" | "info" | "success";
+    title: string;
+    description: string;
+  }>;
 }
 
 const Checker = () => {
