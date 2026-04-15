@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { LoadingSpinner } from "@/components/checker/LoadingSpinner";
 import { ResultDisplay } from "@/components/checker/ResultDisplay";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FileSearch, RotateCcw, Paperclip, Link as LinkIcon, Type } from "lucide-react";
+import { FileSearch, RotateCcw, Paperclip, Type } from "lucide-react";
 
 export interface PlagiarismSource {
   title: string;
@@ -30,16 +30,43 @@ export interface PlagiarismResult {
 
 const Checker = () => {
   const [text, setText] = useState("");
-  const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<PlagiarismResult | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".txt")) {
+      toast({
+        title: "Invalid File",
+        description: "Only .txt files are allowed.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setText(content);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleFileUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSubmit = async () => {
-    if (!text && !url) {
+    if (!text) {
       toast({
         title: "No Content",
-        description: "Please provide text or a URL to check.",
+        description: "Please provide text or a file to check.",
         variant: "destructive",
       });
       return;
@@ -49,10 +76,6 @@ const Checker = () => {
     setResult(null);
 
     try {
-      // If URL is provided, we should ideally handle it. 
-      // Current backend only takes 'text', so we'll just send the text for now.
-      // If the user wants URL support, the backend needs an update too.
-
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/check-plagiarism`,
         {
@@ -91,7 +114,7 @@ const Checker = () => {
 
   const handleReset = () => {
     setText("");
-    setUrl("");
+    setSelectedFile(null);
     setResult(null);
   };
 
@@ -105,12 +128,19 @@ const Checker = () => {
             <h1 className="mb-8 text-center text-3xl font-bold text-[#1e293b]">Plagiarism Checker AI</h1>
             <p className="mb-8 text-center text-slate-600">
               Our AI plagiarism checker is a fast, accurate, and free online tool that helps you detect
-              plagiarism. It's a reliable way to ensure your work is original and written by a human writer.
+plagiarism. It's a reliable way to ensure your work is original and written by a human writer.
             </p>
 
             {!result && (
               <div className="overflow-hidden rounded-xl border bg-white shadow-lg">
                 <div className="p-6">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    accept=".txt"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
                   <div className="relative">
                     <textarea
                       placeholder="The paper discusses the results of a study which explored advanced learners of English..."
@@ -123,22 +153,22 @@ const Checker = () => {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center">
-                    <div className="flex flex-1 items-center gap-2 rounded-full border bg-slate-50 px-4 py-2">
-                      <LinkIcon className="h-4 w-4 text-slate-400" />
-                      <input
-                        type="text"
-                        placeholder="Enter URL/Link here..."
-                        className="w-full bg-transparent text-sm outline-none"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                      />
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="text-sm text-slate-500">
+                      {selectedFile ? `File: ${selectedFile.name}` : "No file selected"}
                     </div>
                     <div className="flex items-center gap-4">
-                      <button className="text-slate-400 hover:text-slate-600">
+                      <button
+                        onClick={handleFileUploadClick}
+                        className="text-slate-400 hover:text-slate-600"
+                        title="Upload .txt file"
+                      >
                         <Paperclip className="h-5 w-5" />
                       </button>
-                      <button className="text-slate-400 hover:text-slate-600">
+                      <button
+                        className="text-slate-400 hover:text-slate-600"
+                        title="Text input"
+                      >
                         <Type className="h-5 w-5" />
                       </button>
                     </div>
