@@ -63,7 +63,7 @@ const Checker = () => {
   };
 
   const handleSubmit = async () => {
-    if (!text) {
+    if (!text && !selectedFile) {
       toast({
         title: "No Content",
         description: "Please provide text or a file to check.",
@@ -76,16 +76,31 @@ const Checker = () => {
     setResult(null);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/check-plagiarism`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text: text }),
-        }
-      );
+      let response;
+      
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        
+        response = await fetch(
+          `${import.meta.env.VITE_API_URL}/check-plagiarism-file`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+      } else {
+        response = await fetch(
+          `${import.meta.env.VITE_API_URL}/check-plagiarism`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: text }),
+          }
+        );
+      }
 
       if (!response.ok) {
         const errText = await response.text();

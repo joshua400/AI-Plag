@@ -12,6 +12,27 @@ interface ResultDisplayProps {
 export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
   const [expandedSource, setExpandedSource] = useState<number | null>(null);
 
+  const handleDownload = () => {
+    const report = {
+      wordCount: result.wordCount,
+      characterCount: result.characterCount,
+      plagiarismPercentage: result.plagiarismPercentage,
+      exactMatchPercentage: result.exactMatchPercentage,
+      partialMatchPercentage: result.partialMatchPercentage,
+      uniquePercentage: result.uniquePercentage,
+      sources: result.sources,
+      checkedAt: new Date().toISOString(),
+    };
+
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `plagiarism-report-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const chartData = [
     { name: "Plagiarized", value: result.plagiarismPercentage, color: "#ef4444" },
     { name: "Unique", value: result.uniquePercentage, color: "#10b981" },
@@ -50,10 +71,10 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
               </div>
 
               <div className="mt-8 flex items-center justify-between">
-                <Button variant="ghost" size="sm" className="text-slate-400">
+<Button variant="ghost" size="sm" className="text-slate-400" onClick={handleDownload}>
                   <Download className="mr-2 h-4 w-4" />
                 </Button>
-                <Button className="bg-cyan-500 hover:bg-cyan-600">Download Report</Button>
+                <Button className="bg-cyan-500 hover:bg-cyan-600" onClick={handleDownload}>Download Report</Button>
               </div>
             </div>
           </div>
