@@ -124,6 +124,9 @@ const Checker = () => {
       });
     } finally {
       setIsLoading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -131,6 +134,9 @@ const Checker = () => {
     setText("");
     setSelectedFile(null);
     setResult(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
