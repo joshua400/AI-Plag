@@ -13,22 +13,36 @@ export const ResultDisplay = ({ result, onReset }: ResultDisplayProps) => {
   const [expandedSource, setExpandedSource] = useState<number | null>(null);
 
   const handleDownload = () => {
-    const report = {
-      wordCount: result.wordCount,
-      characterCount: result.characterCount,
-      plagiarismPercentage: result.plagiarismPercentage,
-      exactMatchPercentage: result.exactMatchPercentage,
-      partialMatchPercentage: result.partialMatchPercentage,
-      uniquePercentage: result.uniquePercentage,
-      sources: result.sources,
-      checkedAt: new Date().toISOString(),
-    };
+    const reportText = `
+PLAGIARISM CHECK REPORT
+====================
+Generated: ${new Date().toISOString()}
 
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+SUMMARY
+-------
+Word Count: ${result.wordCount}
+Character Count: ${result.characterCount}
+
+PLAGIARISM RESULTS
+----------------
+Plagiarized: ${result.plagiarismPercentage}%
+Exact Match: ${result.exactMatchPercentage}%
+Partial Match: ${result.partialMatchPercentage}%
+Unique Content: ${result.uniquePercentage}%
+
+SOURCES
+-------
+${result.sources.map((source, i) => `${i + 1}. ${source.title}
+   URL: ${source.url}
+   Matched Text: ${source.matchedText}
+`).join("\n")}
+    `.trim();
+
+    const blob = new Blob([reportText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `plagiarism-report-${Date.now()}.json`;
+    a.download = `plagiarism-report-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
